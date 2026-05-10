@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utleie – Månedlig sjekkliste</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F2EC;
+    --card: #FFFDF9;
+    --text: #1A1814;
+    --muted: #7A7570;
+    --border: #E2DDD5;
+    --green: #1D6B4A;
+    --green-bg: #E8F4EE;
+    --amber: #9A6200;
+    --amber-bg: #FEF3DC;
+    --accent: #2C5F8A;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  header p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .container { max-width: 420px; margin: 0 auto; }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 1.25rem;
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s;
+  }
+  .nav-btn:hover { background: var(--bg); }
+
+  .month-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+
+  .item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .item.checked {
+    background: var(--green-bg);
+    border-color: #A8D5BC;
+  }
+
+  .cb {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: transparent;
+    transition: all 0.15s;
+  }
+
+  .item.checked .cb {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .item-text { flex: 1; }
+  .item-name { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+  .item.checked .item-name { color: var(--green); }
+  .item-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--text); }
+  .stat-val.ok { color: var(--green); }
+  .stat-val.partial { color: var(--amber); }
+
+  .history-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot.full { background: var(--green); }
+  .dot.partial { background: #D4882A; }
+  .dot.none { background: var(--border); }
+
+  .badge {
+    margin-left: auto;
+    font-size: 0.7rem;
+    padding: 2px 9px;
+    border-radius: 99px;
+  }
+  .badge.full { background: var(--green-bg); color: var(--green); }
+  .badge.partial { background: var(--amber-bg); color: var(--amber); }
+  .badge.none { background: var(--bg); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Utleie – sjekkliste</h1>
+    <p>Månedlige utgifter for utleieboligen</p>
+  </header>
+
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)" aria-label="Forrige måned">&#8592;</button>
+    <span class="month-label" id="month-display"></span>
+    <button class="nav-btn" onclick="changeMonth(1)" aria-label="Neste måned">&#8594;</button>
+  </div>
+
+  <div class="items" id="items-list"></div>
+
+  <div class="summary">
+    <div class="stat">
+      <div class="stat-label">Krysset av</div>
+      <div class="stat-val" id="stat-done">0 / 3</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Status</div>
+      <div class="stat-val" id="stat-status">–</div>
+    </div>
+  </div>
+
+  <div class="history-title">Historikk</div>
+  <div id="history-list"></div>
+</div>
+
+<script>
+const ITEMS = [
+  { id: "innbo", name: "Innboforsikring", desc: "Betalt denne måneden" },
+  { id: "hus",   name: "Husforsikring",   desc: "Betalt denne måneden" },
+  { id: "lan",   name: "Lån – utleiebolig", desc: "Betalt denne måneden" },
+];
+
+const MONTHS = ["Januar","Februar","Mars","April","Mai","Juni","Juli","August","September","Oktober","November","Desember"];
+
+let data = JSON.parse(localStorage.getItem("utleie_v1") || "{}");
+const now = new Date();
+let vy = now.getFullYear(), vm = now.getMonth();
+
+function key(y, m) { return y + "-" + String(m+1).padStart(2,"0"); }
+function getChecked(y, m) { return data[key(y,m)] || {}; }
+
+function toggle(id) {
+  const k = key(vy, vm);
+  if (!data[k]) data[k] = {};
+  data[k][id] = !data[k][id];
+  localStorage.setItem("utleie_v1", JSON.stringify(data));
+  render();
+}
+
+function changeMonth(d) {
+  vm += d;
+  if (vm > 11) { vm = 0; vy++; }
+  if (vm < 0)  { vm = 11; vy--; }
+  render();
+}
+
+function render() {
+  document.getElementById("month-display").textContent = MONTHS[vm] + " " + vy;
+  const checked = getChecked(vy, vm);
+
+  document.getElementById("items-list").innerHTML = ITEMS.map(item => {
+    const done = !!checked[item.id];
+    return `<div class="item${done?" checked":""}" onclick="toggle('${item.id}')">
+      <div class="cb">${done?"✓":""}</div>
+      <div class="item-text">
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const doneCount = ITEMS.filter(i => !!checked[i.id]).length;
+  const doneEl = document.getElementById("stat-done");
+  const statusEl = document.getElementById("stat-status");
+  doneEl.textContent = doneCount + " / " + ITEMS.length;
+
+  if (doneCount === ITEMS.length) {
+    doneEl.className = "stat-val ok";
+    statusEl.textContent = "Alt ok ✓";
+    statusEl.className = "stat-val ok";
+  } else if (doneCount > 0) {
+    doneEl.className = "stat-val partial";
+    statusEl.textContent = "Påbegynt";
+    statusEl.className = "stat-val partial";
+  } else {
+    doneEl.className = "stat-val";
+    statusEl.textContent = "–";
+    statusEl.className = "stat-val";
+  }
+
+  let hist = "";
+  for (let i = 5; i >= 0; i--) {
+    let hm = vm - i, hy = vy;
+    while (hm < 0) { hm += 12; hy--; }
+    const hc = getChecked(hy, hm);
+    const hd = ITEMS.filter(it => !!hc[it.id]).length;
+    const cls = hd === ITEMS.length ? "full" : hd > 0 ? "partial" : "none";
+    const lbl = hd === ITEMS.length ? "Fullført" : hd > 0 ? hd+"/"+ITEMS.length : "–";
+    hist += `<div class="history-row"><div class="dot ${cls}"></div><span>${MONTHS[hm]} ${hy}</span><span class="badge ${cls}">${lbl}</span></div>`;
+  }
+  document.getElementById("history-list").innerHTML = hist;
+}
+
+render();
+</script>
+</body>
+</html>
